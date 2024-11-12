@@ -1,0 +1,108 @@
+@startuml
+' Define main packages for MVC structure
+package "Modèle" {
+    ' Classes in the model
+    class Image {
+        - data : byte[]
+        + getData() : byte[]
+        + setData(data : byte[]) : void
+    }
+
+    class Perspective {
+        - scale : double
+        - position : Point
+        + getScale() : double
+        + getPosition() : Point
+        + setScale(scale : double) : void
+        + setPosition(position : Point) : void
+    }
+
+    ' Observer pattern for model update notification
+    interface Subject {
+        + attach(Observer) : void
+        + detach(Observer) : void
+        + notifyObservers() : void
+    }
+
+    ' Image and Perspective are separate subjects in Observer pattern
+    Image --> Subject
+    Perspective --> Subject
+}
+
+package "Vue" {
+    ' Classes in the view
+    interface Observer {
+        + update() : void
+    }
+
+    class ThumbnailView {
+        + update() : void
+    }
+
+    class PerspectiveView {
+        + update() : void
+    }
+
+    ThumbnailView --> Observer
+    PerspectiveView --> Observer
+}
+
+package "Contrôleur" {
+    ' Command pattern for undoable operations
+    interface Command {
+        + execute() : void
+        + undo() : void
+    }
+
+    ' Specific commands for zoom and translation
+    class ZoomCommand {
+        + execute() : void
+        + undo() : void
+    }
+
+    class TranslateCommand {
+        + execute() : void
+        + undo() : void
+    }
+
+    Command <|-- ZoomCommand
+    Command <|-- TranslateCommand
+
+    ' Singleton pattern for command history management
+    class CommandManager {
+        - commands : List<Command>
+        + addCommand(command : Command) : void
+        + undo() : void
+        {static} - instance : CommandManager
+        {static} + getInstance() : CommandManager
+    }
+
+    ' Mediator pattern (optional) for interaction between controls
+    interface Mediator {
+        + notify(sender, event) : void
+    }
+
+    class ImageController {
+        + handleZoom(scale : double) : void
+        + handleTranslate(x : int, y : int) : void
+    }
+
+    class PerspectiveController {
+        + handleZoom(scale : double) : void
+        + handleTranslate(x : int, y : int) : void
+    }
+
+    ImageController --> Mediator
+    PerspectiveController --> Mediator
+    CommandManager --> Command
+    CommandManager --|> Singleton
+}
+
+' Relationships between model, view, and controller
+Image --> Command : <<uses>>
+Perspective --> Command : <<uses>>
+ThumbnailView --> Image
+PerspectiveView --> Perspective
+ImageController --> Image
+PerspectiveController --> Perspective
+@enduml
