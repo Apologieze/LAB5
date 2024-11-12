@@ -10,7 +10,12 @@ import java.io.IOException;
 
 public class MainApp {
     public static void main(String[] args) throws IOException {
-        BufferedImage img = ImageIO.read(new File("/home/apo/Documents/Prog/Java/LAB5/src/main/java/org/example/image.png"));
+        File file = new File("./image.png");
+
+        if (!file.exists()) {
+            System.out.println("File not found: " + file.getAbsolutePath());
+        }
+        BufferedImage img = ImageIO.read(file);
         ImageModel imageModel = new ImageModel();
         imageModel.setImage(img);
         Perspective perspective = new Perspective();
