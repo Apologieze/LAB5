@@ -21,7 +21,14 @@ public class ImageView extends JPanel implements Observer {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        // Draw the scaled and translated image based on perspective
+        if (imageModel.getImage() != null) {
+            Graphics2D g2d = (Graphics2D) g;
+            // Apply perspective transformations
+            g2d.translate(perspective.getPosition().getX(), perspective.getPosition().getY());
+            g2d.scale(perspective.getScale(), perspective.getScale());
+            // Draw the image
+            g2d.drawImage(imageModel.getImage(), 0, 0, this);
+        }
     }
 }
 
