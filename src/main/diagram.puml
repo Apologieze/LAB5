@@ -5,7 +5,6 @@ package "Modèle" {
     class Image {
         - data : byte[]
         + getData() : byte[]
-        + setData(data : byte[]) : void
     }
 
     class Perspective {
@@ -82,27 +81,19 @@ package "Contrôleur" {
         + notify(sender, event) : void
     }
 
-    class ImageController {
-        + handleZoom(scale : double) : void
-        + handleTranslate(x : int, y : int) : void
-    }
-
     class PerspectiveController {
         + handleZoom(scale : double) : void
         + handleTranslate(x : int, y : int) : void
     }
 
-    ImageController --> Mediator
     PerspectiveController --> Mediator
     CommandManager --> Command
     CommandManager --|> Singleton
 }
 
 ' Relationships between model, view, and controller
-Image --> Command : <<uses>>
 Perspective --> Command : <<uses>>
 ThumbnailView --> Image
 PerspectiveView --> Perspective
-ImageController --> Image
 PerspectiveController --> Perspective
 @enduml
