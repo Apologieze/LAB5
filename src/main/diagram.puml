@@ -1,7 +1,6 @@
 @startuml
 ' Define main packages for MVC structure
 package "Modèle" {
-    ' Classes in the model
     class Image {
         - data : byte[]
         + getData() : byte[]
@@ -17,27 +16,23 @@ package "Modèle" {
         + save(filePath : String) : void
     }
 
-    ' Observer pattern for model update notification
     interface Subject {
         + attach(Observer) : void
         + detach(Observer) : void
         + notifyObservers() : void
     }
 
-    ' Image and Perspective are separate subjects in Observer pattern
     Image --> Subject
     Perspective --> Subject
 }
 
 package "Services" {
-    ' Service for saving perspectives to a file
     class SaveService {
         + savePerspective(perspective : Perspective, filePath : String) : void
     }
 }
 
 package "Vue" {
-    ' Classes in the view
     interface Observer {
         + update() : void
     }
@@ -55,13 +50,11 @@ package "Vue" {
 }
 
 package "Contrôleur" {
-    ' Command pattern for undoable operations
     interface Command {
         + execute() : void
         + undo() : void
     }
 
-    ' Specific commands for zoom and translation
     class ZoomCommand {
         + execute() : void
         + undo() : void
@@ -75,15 +68,21 @@ package "Contrôleur" {
     Command <|-- ZoomCommand
     Command <|-- TranslateCommand
 
-    ' Command for saving a perspective
+    ' Singleton implementation for SaveCommand
     class SaveCommand {
+        - instance : SaveCommand
+        - saveService : SaveService
+        - perspective : Perspective
+        - filePath : String
+        {static} + getInstance(saveService : SaveService) : SaveCommand
+        + configure(perspective : Perspective, filePath : String) : void
         + execute() : void
         + undo() : void
     }
 
     Command <|-- SaveCommand
+    SaveCommand --|> Singleton
 
-    ' Singleton pattern for command history management
     class CommandManager {
         - commands : List<Command>
         + addCommand(command : Command) : void
@@ -92,21 +91,22 @@ package "Contrôleur" {
         {static} + getInstance() : CommandManager
     }
 
+    CommandManager --> Command
+    CommandManager --|> Singleton
+
     class PerspectiveController {
         + handleZoom(scale : double) : void
         + handleTranslate(x : int, y : int) : void
         + handleSave(filePath : String) : void
     }
 
-    CommandManager --> Command
-    CommandManager --|> Singleton
+    PerspectiveController --> Perspective
+    SaveCommand --> SaveService
 }
 
 ' Relationships between model, view, and controller
 Perspective --> Command : <<uses>>
 ThumbnailView --> Image
 PerspectiveView --> Perspective
-PerspectiveController --> Perspective
 SaveService --> Perspective
-SaveCommand --> SaveService
 @enduml
