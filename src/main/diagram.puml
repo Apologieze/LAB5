@@ -92,18 +92,12 @@ package "Contrôleur" {
         {static} + getInstance() : CommandManager
     }
 
-    ' Mediator pattern (optional) for interaction between controls
-    interface Mediator {
-        + notify(sender, event) : void
-    }
-
     class PerspectiveController {
         + handleZoom(scale : double) : void
         + handleTranslate(x : int, y : int) : void
         + handleSave(filePath : String) : void
     }
 
-    PerspectiveController --> Mediator
     CommandManager --> Command
     CommandManager --|> Singleton
 }
