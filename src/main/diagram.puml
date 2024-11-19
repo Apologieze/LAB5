@@ -9,10 +9,13 @@ package "Modèle" {
     class Perspective {
         - scale : double
         - position : Point
+        - image : Image
         + getScale() : double
         + getPosition() : Point
         + setScale(scale : double) : void
         + setPosition(position : Point) : void
+        + setImage(image : Image) : void
+        + getImage() : Image
         + save(filePath : String) : void
     }
 
@@ -22,8 +25,8 @@ package "Modèle" {
         + notifyObservers() : void
     }
 
-    Image --> Subject
     Perspective --> Subject
+    Perspective --> Image
 }
 
 package "Services" {
@@ -81,23 +84,23 @@ package "Contrôleur" {
     }
 
     Command <|-- SaveCommand
-    SaveCommand --|> Singleton
 
+    ' Singleton implementation for CommandManager
     class CommandManager {
-        - commands : List<Command>
-        + addCommand(command : Command) : void
-        + undo() : void
+        - commands : Map<Perspective, List<Command>>
         {static} - instance : CommandManager
         {static} + getInstance() : CommandManager
+        + addCommand(perspective : Perspective, command : Command) : void
+        + undo(perspective : Perspective) : void
     }
 
     CommandManager --> Command
-    CommandManager --|> Singleton
 
     class PerspectiveController {
-        + handleZoom(scale : double) : void
-        + handleTranslate(x : int, y : int) : void
-        + handleSave(filePath : String) : void
+        - perspectiveMap : Map<Perspective, PerspectiveView>
+        + handleZoom(perspective : Perspective, scale : double) : void
+        + handleTranslate(perspective : Perspective, x : int, y : int) : void
+        + handleSave(perspective : Perspective, filePath : String) : void
     }
 
     PerspectiveController --> Perspective
@@ -105,7 +108,6 @@ package "Contrôleur" {
 }
 
 ' Relationships between model, view, and controller
-Perspective --> Command : <<uses>>
 ThumbnailView --> Image
 PerspectiveView --> Perspective
 SaveService --> Perspective
