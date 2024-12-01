@@ -1,9 +1,6 @@
-package org.example;
-
-import java.util.Stack;
+package controller;
 
 public interface Command {
     void execute();
     void undo();
 }
-
