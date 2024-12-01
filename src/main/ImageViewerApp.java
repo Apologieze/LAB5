@@ -1,6 +1,8 @@
 package main;
 
+import services.SaveService;
 import view.ImageTab;
+import view.ImageTabPane;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -10,9 +12,10 @@ import java.nio.file.Files;
 
 
 public class ImageViewerApp extends JFrame {
-    private JTabbedPane tabbedPane;
+    private ImageTabPane imageTabPane;
     private JMenuItem closeMenuItem;
     private JMenuItem duplicateMenuItem;
+    private JMenuItem saveMenuItem;
 
     public ImageViewerApp() {
         setTitle("Image Pro Editor Premium Deluxe 121");
@@ -31,15 +34,29 @@ public class ImageViewerApp extends JFrame {
         JMenuItem openMenuItem = new JMenuItem("Ouvrir");
         this.closeMenuItem = new JMenuItem("Fermer");
         this.duplicateMenuItem = new JMenuItem("Nouvelle perspective");
+        this.saveMenuItem = new JMenuItem("Sauvegarder");
 
         openMenuItem.addActionListener(e -> openImage());
         closeMenuItem.addActionListener(e -> {
-            deleteTab();
+            if (imageTabPane.deleteTab()) {
+                setMenuItem(false);
+            }
         });
         duplicateMenuItem.addActionListener(e -> {
-            ImageTab currentTab = (ImageTab) tabbedPane.getSelectedComponent();
+            ImageTab currentTab = (ImageTab) imageTabPane.getSelectedComponent();
             if (currentTab != null) {
-                createTab("copy "+currentTab.getTitle(), currentTab.getPerspective().getImage().getData());
+                imageTabPane.createTab("copy "+currentTab.getTitle(), currentTab.getPerspective().getImage().getData());
+            }
+        });
+
+        saveMenuItem.addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Save File");
+
+            int userSelection = fileChooser.showSaveDialog(null);
+            if (userSelection == JFileChooser.APPROVE_OPTION) {
+                File fileToSave = fileChooser.getSelectedFile();
+                SaveService.saveProject(imageTabPane, fileToSave.getAbsolutePath()+".imagepro");
             }
         });
 
@@ -47,9 +64,9 @@ public class ImageViewerApp extends JFrame {
         fichierMenu.add(openMenuItem);
         fichierMenu.add(closeMenuItem);
         fichierMenu.add(duplicateMenuItem);
+        fichierMenu.add(saveMenuItem);
 
-        closeMenuItem.setEnabled(false);
-        duplicateMenuItem.setEnabled(false);
+        setMenuItem(false);
 
         menuBar.add(fichierMenu);
 
@@ -61,23 +78,30 @@ public class ImageViewerApp extends JFrame {
         menuBar.add(editMenu);
 
         setJMenuBar(menuBar);
-        tabbedPane = new JTabbedPane();
-        add(tabbedPane);
+        imageTabPane = new ImageTabPane();
+        add(imageTabPane);
     }
 
 
     private void openImage() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileFilter(new FileNameExtensionFilter(
-                "Image files", "jpg", "jpeg", "png", "gif", "bmp"));
+                "Image files", "jpg", "jpeg", "png", "gif", "bmp", "imagepro"));
 
         int result = fileChooser.showOpenDialog(this);
         if (result == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
+            if (selectedFile.getName().toLowerCase().endsWith(".imagepro")) {
+                this.imageTabPane.addfromFile(selectedFile);
+                setMenuItem(true);
+                return;
+            }
             try {
                 byte[] imageData = Files.readAllBytes(selectedFile.toPath());
 
-                createTab(selectedFile.getName(), imageData);
+                if(imageTabPane.createTab(selectedFile.getName(), imageData)){
+                    setMenuItem(true);
+                }
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(this,
                         "Error loading image: " + ex.getMessage(),
@@ -87,34 +111,18 @@ public class ImageViewerApp extends JFrame {
         }
     }
 
-    private void createTab(String imageName, byte[] imageData) {
-        if (tabbedPane.getTabCount() == 0) {
-            closeMenuItem.setEnabled(true);
-            duplicateMenuItem.setEnabled(true);
-        }
-        ImageTab newTab = new ImageTab(imageName, imageData);
-        tabbedPane.addTab(imageName, newTab);
-        tabbedPane.setSelectedComponent(newTab);
-    }
-
-    private void deleteTab() {
-        if (tabbedPane.getTabCount() == 1) {
-            closeMenuItem.setEnabled(false);
-            duplicateMenuItem.setEnabled(false);
-        }
-        ImageTab currentTab = (ImageTab) tabbedPane.getSelectedComponent();
-        if (currentTab != null) {
-            tabbedPane.remove(currentTab);
-        }
-    }
-
     private void undoLastAction() {
-        ImageTab currentTab = (ImageTab) tabbedPane.getSelectedComponent();
+        ImageTab currentTab = (ImageTab) imageTabPane.getSelectedComponent();
         if (currentTab != null) {
             currentTab.undo();
         }
     }
 
+    private void setMenuItem(boolean enabled) {
+        closeMenuItem.setEnabled(enabled);
+        duplicateMenuItem.setEnabled(enabled);
+        saveMenuItem.setEnabled(enabled);
+    }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {

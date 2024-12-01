@@ -27,7 +27,6 @@ public class PerspectiveView extends JPanel implements Observer {
 
         setPreferredSize(new Dimension(800, 600));
 
-        // Simplified event listeners that delegate to controller
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {

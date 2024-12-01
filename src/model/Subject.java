@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Subject {
-    private List<Observer> observers = new ArrayList<>();
+    private transient List<Observer> observers = new ArrayList<>();
 
     public void attach(Observer observer) {
         if (!observers.contains(observer)) {

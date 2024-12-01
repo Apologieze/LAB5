@@ -7,35 +7,34 @@ import model.Perspective;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class ImageTab extends JPanel {
+public class ImageTab extends JPanel implements Serializable {
     private Perspective perspective;
-    private PerspectiveView perspectiveView;
-    private ThumbnailView thumbnailView;
-    private PerspectiveController controller;
+    private transient PerspectiveView perspectiveView;
+    private transient ThumbnailView thumbnailView;
+    private transient PerspectiveController controller;
     private String title;
 
     public ImageTab(String title, byte[] imageData) {
+        this(title, new Perspective());
+        perspective.setImage(new Image(imageData));
+    }
+
+    public ImageTab(String title, Perspective perspective) {
         this.title = title;
-
         setLayout(new BorderLayout());
-
-        perspective = new Perspective();
-        Image image = new Image(imageData);
-        perspective.setImage(image);
+        this.perspective = perspective;
 
         controller = new PerspectiveController();
 
         perspectiveView = new PerspectiveView(perspective, controller);
         thumbnailView = new ThumbnailView(perspective);
 
-        // Layout
         add(perspectiveView, BorderLayout.CENTER);
         add(thumbnailView, BorderLayout.EAST);
     }
@@ -50,5 +49,11 @@ public class ImageTab extends JPanel {
 
     public Perspective getPerspective() {
         return perspective;
+    }
+
+    @Serial
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        System.out.println("Serializing ImageTab"+title);
+        out.defaultWriteObject();
     }
 }

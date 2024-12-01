@@ -1,6 +1,8 @@
 package model;
 
-public class Image {
+import java.io.Serializable;
+
+public class Image implements Serializable {
     private byte[] data;
 
     public Image(byte[] data) {

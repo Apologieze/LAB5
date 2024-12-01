@@ -1,10 +1,9 @@
 package model;
 
 import java.awt.Point;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.Serializable;
 
-public class Perspective extends Subject {
+public class Perspective extends Subject implements Serializable {
     private double scale = 1.0;
     private Point position = new Point(0, 0);
     private Image image;
@@ -36,9 +35,4 @@ public class Perspective extends Subject {
         notifyObservers();
     }
 
-    public void save(String filePath) {
-        // Placeholder for save functionality
-        // In a real implementation, this would use SaveService
-        System.out.println("Saving perspective to: " + filePath);
-    }
 }
