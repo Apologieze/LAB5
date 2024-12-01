@@ -19,19 +19,19 @@ public class ImageTab extends JPanel {
     private PerspectiveView perspectiveView;
     private ThumbnailView thumbnailView;
     private PerspectiveController controller;
+    private String title;
 
-    public ImageTab(String imageName, byte[] imageData) {
+    public ImageTab(String title, byte[] imageData) {
+        this.title = title;
+
         setLayout(new BorderLayout());
 
-        // Create model
-        Image image = new Image(imageData);
         perspective = new Perspective();
+        Image image = new Image(imageData);
         perspective.setImage(image);
 
-        // Create controller
         controller = new PerspectiveController();
 
-        // Create views
         perspectiveView = new PerspectiveView(perspective, controller);
         thumbnailView = new ThumbnailView(perspective);
 
@@ -42,5 +42,13 @@ public class ImageTab extends JPanel {
 
     public void undo() {
         controller.undo(perspective);
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public Perspective getPerspective() {
+        return perspective;
     }
 }

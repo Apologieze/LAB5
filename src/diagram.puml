@@ -1,0 +1,114 @@
+@startuml
+' Define main packages for MVC structure
+package "Modèle" {
+    class Image {
+        - data : byte[]
+        + getData() : byte[]
+    }
+
+    class Perspective {
+        - scale : double
+        - position : Point
+        - image : Image
+        + getScale() : double
+        + getPosition() : Point
+        + setScale(scale : double) : void
+        + setPosition(position : Point) : void
+        + setImage(image : Image) : void
+        + getImage() : Image
+        + save(filePath : String) : void
+    }
+
+    interface Subject {
+        + attach(Observer) : void
+        + detach(Observer) : void
+        + notifyObservers() : void
+    }
+
+    Perspective --> Subject
+    Perspective --> Image
+}
+
+package "Services" {
+    class SaveService {
+        + savePerspective(perspective : Perspective, filePath : String) : void
+    }
+}
+
+package "Vue" {
+    interface Observer {
+        + update() : void
+    }
+
+    class ThumbnailView {
+        + update() : void
+    }
+
+    class PerspectiveView {
+        + update() : void
+    }
+
+    ThumbnailView --> Observer
+    PerspectiveView --> Observer
+}
+
+package "Contrôleur" {
+    interface Command {
+        + execute() : void
+        + undo() : void
+    }
+
+    class ZoomCommand {
+        + execute() : void
+        + undo() : void
+    }
+
+    class TranslateCommand {
+        + execute() : void
+        + undo() : void
+    }
+
+    Command <|-- ZoomCommand
+    Command <|-- TranslateCommand
+
+    ' Singleton implementation for SaveCommand
+    class SaveCommand {
+        - instance : SaveCommand
+        - saveService : SaveService
+        - perspective : Perspective
+        - filePath : String
+        {static} + getInstance(saveService : SaveService) : SaveCommand
+        + configure(perspective : Perspective, filePath : String) : void
+        + execute() : void
+        + undo() : void
+    }
+
+    Command <|-- SaveCommand
+
+    ' Singleton implementation for CommandManager
+    class CommandManager {
+        - commands : Map<Perspective, List<Command>>
+        {static} - instance : CommandManager
+        {static} + getInstance() : CommandManager
+        + addCommand(perspective : Perspective, command : Command) : void
+        + undo(perspective : Perspective) : void
+    }
+
+    CommandManager --> Command
+
+    class PerspectiveController {
+        - perspectiveMap : Map<Perspective, PerspectiveView>
+        + handleZoom(perspective : Perspective, scale : double) : void
+        + handleTranslate(perspective : Perspective, x : int, y : int) : void
+        + handleSave(perspective : Perspective, filePath : String) : void
+    }
+
+    PerspectiveController --> Perspective
+    SaveCommand --> SaveService
+}
+
+' Relationships between model, view, and controller
+ThumbnailView --> Image
+PerspectiveView --> Perspective
+SaveService --> Perspective
+@enduml

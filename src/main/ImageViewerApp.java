@@ -7,17 +7,17 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
+
 
 public class ImageViewerApp extends JFrame {
     private JTabbedPane tabbedPane;
+    private JMenuItem closeMenuItem;
+    private JMenuItem duplicateMenuItem;
 
     public ImageViewerApp() {
         setTitle("Image Pro Editor Premium Deluxe 121");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1200, 800);
-
 
         createMenuBarAndTab();
 
@@ -27,23 +27,32 @@ public class ImageViewerApp extends JFrame {
     private void createMenuBarAndTab() {
         JMenuBar menuBar = new JMenuBar();
 
-        // Fichier Menu
         JMenu fichierMenu = new JMenu("Fichier");
         JMenuItem openMenuItem = new JMenuItem("Ouvrir");
-        JMenuItem closeMenuItem = new JMenuItem("Fermer");
+        this.closeMenuItem = new JMenuItem("Fermer");
+        this.duplicateMenuItem = new JMenuItem("Nouvelle perspective");
+
         openMenuItem.addActionListener(e -> openImage());
         closeMenuItem.addActionListener(e -> {
+            deleteTab();
+        });
+        duplicateMenuItem.addActionListener(e -> {
             ImageTab currentTab = (ImageTab) tabbedPane.getSelectedComponent();
             if (currentTab != null) {
-                tabbedPane.remove(currentTab);
+                createTab("copy "+currentTab.getTitle(), currentTab.getPerspective().getImage().getData());
             }
         });
 
+
         fichierMenu.add(openMenuItem);
         fichierMenu.add(closeMenuItem);
+        fichierMenu.add(duplicateMenuItem);
+
+        closeMenuItem.setEnabled(false);
+        duplicateMenuItem.setEnabled(false);
+
         menuBar.add(fichierMenu);
 
-        // Edit Menu
         JMenu editMenu = new JMenu("Edit");
         JMenuItem undoMenuItem = new JMenuItem("Undo");
         undoMenuItem.addActionListener(e -> undoLastAction());
@@ -68,16 +77,34 @@ public class ImageViewerApp extends JFrame {
             try {
                 byte[] imageData = Files.readAllBytes(selectedFile.toPath());
 
-                // Create a new tab for this image
-                ImageTab newTab = new ImageTab(selectedFile.getName(), imageData);
-                tabbedPane.addTab(selectedFile.getName(), newTab);
-                tabbedPane.setSelectedComponent(newTab);
+                createTab(selectedFile.getName(), imageData);
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(this,
                         "Error loading image: " + ex.getMessage(),
                         "Error",
                         JOptionPane.ERROR_MESSAGE);
             }
+        }
+    }
+
+    private void createTab(String imageName, byte[] imageData) {
+        if (tabbedPane.getTabCount() == 0) {
+            closeMenuItem.setEnabled(true);
+            duplicateMenuItem.setEnabled(true);
+        }
+        ImageTab newTab = new ImageTab(imageName, imageData);
+        tabbedPane.addTab(imageName, newTab);
+        tabbedPane.setSelectedComponent(newTab);
+    }
+
+    private void deleteTab() {
+        if (tabbedPane.getTabCount() == 1) {
+            closeMenuItem.setEnabled(false);
+            duplicateMenuItem.setEnabled(false);
+        }
+        ImageTab currentTab = (ImageTab) tabbedPane.getSelectedComponent();
+        if (currentTab != null) {
+            tabbedPane.remove(currentTab);
         }
     }
 
