@@ -6,6 +6,7 @@ import view.ImageTabPane;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -25,6 +26,12 @@ public class ImageViewerApp extends JFrame {
         createMenuBarAndTab();
 
         setLocationRelativeTo(null);
+
+        getRootPane().registerKeyboardAction(
+                e -> undoLastAction(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_Z, KeyEvent.CTRL_DOWN_MASK),
+                JComponent.WHEN_IN_FOCUSED_WINDOW
+        );
     }
 
     private void createMenuBarAndTab() {
