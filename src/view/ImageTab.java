@@ -20,9 +20,9 @@ public class ImageTab extends JPanel implements Serializable {
     private transient PerspectiveController controller;
     private String title;
 
-    public ImageTab(String title, byte[] imageData) {
+    public ImageTab(String title, Image image) {
         this(title, new Perspective());
-        perspective.setImage(new Image(imageData));
+        perspective.setImage(image);
     }
 
     public ImageTab(String title, Perspective perspective) {

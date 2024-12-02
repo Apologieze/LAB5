@@ -1,5 +1,6 @@
 package main;
 
+import model.Image;
 import services.SaveService;
 import view.ImageTab;
 import view.ImageTabPane;
@@ -52,7 +53,7 @@ public class ImageViewerApp extends JFrame {
         duplicateMenuItem.addActionListener(e -> {
             ImageTab currentTab = (ImageTab) imageTabPane.getSelectedComponent();
             if (currentTab != null) {
-                imageTabPane.createTab("copy "+currentTab.getTitle(), currentTab.getPerspective().getImage().getData());
+                imageTabPane.createTab("copy "+currentTab.getTitle(), currentTab.getPerspective().getImage());
             }
         });
 
@@ -106,7 +107,7 @@ public class ImageViewerApp extends JFrame {
             try {
                 byte[] imageData = Files.readAllBytes(selectedFile.toPath());
 
-                if(imageTabPane.createTab(selectedFile.getName(), imageData)){
+                if(imageTabPane.createTab(selectedFile.getName(), new Image(imageData))) {
                     setMenuItem(true);
                 }
             } catch (IOException ex) {

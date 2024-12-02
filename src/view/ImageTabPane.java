@@ -1,5 +1,6 @@
 package view;
 
+import model.Image;
 import model.Perspective;
 
 import javax.swing.*;
@@ -8,8 +9,8 @@ import java.io.*;
 
 public class ImageTabPane extends JTabbedPane implements Serializable {
 
-    public boolean createTab(String imageName, byte[] imageData) {
-        ImageTab newTab = new ImageTab(imageName, imageData);
+    public boolean createTab(String imageName, Image image) {
+        ImageTab newTab = new ImageTab(imageName, image);
         this.addTab(imageName, newTab);
         this.setSelectedComponent(newTab);
         return this.getTabCount() == 1;
